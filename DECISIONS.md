@@ -26,8 +26,7 @@ Commit this answer before your first `uv run p2 score` on the own corpus.
 Git history then shows that the expectation came first, which is what lets it be wrong in a way that teaches you something.
 If you were surprised later, say so in prompt 4 or in EVAL.md; do not come back and rewrite this one.
 
-TODO: your answer to prompt 1.
-
+I picked a corpus of open-access scientific papers about snow and avalanches, specifically avalanche forecasting, snowpack stability, and avalanche hazard because I am interested in backcountry skiing how the science of the snowpack impacts the avalanche danger and forecast. I would expect hybrid to perform the best of all the options because it balances the techinical terms and the context the best. I think that the reranker would perform the worst because it only looks at the first 600 characters and each document is much longer. 
 ---
 
 ## 2. A fork in the road
