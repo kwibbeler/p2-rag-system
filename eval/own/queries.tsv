@@ -2,3 +2,44 @@
 # origin is hand when you wrote the query yourself and claude when a model drafted it; at least 10 must be hand.
 # class is a word you choose, for example identifier, paraphrase or mixed as in the shared sets; scores are reported per class.
 # Lines that start with # are comments, so delete these lines or keep them, as you like.
+# c01-c30: drafted by Claude Code (origin claude). Your own questions go below as h01, h02, ... with origin hand.
+c01	identifier	EAWS matrix regional avalanche danger level	claude
+c02	identifier	extended column test ECT interpretation	claude
+c03	identifier	AutoATES avalanche terrain exposure scale mapping	claude
+c04	identifier	SNOWPACK model critical crack length validation	claude
+c05	identifier	propagation saw test anticrack arrest slab touchdown	claude
+c06	identifier	North American avalanche danger scale user perspective	claude
+c07	identifier	Colorado large magnitude avalanche frequency drivers	claude
+c08	identifier	model-based avalanche forecast versus human forecaster danger level skill	claude
+c09	identifier	glide-snow avalanche release area model	claude
+c10	identifier	Saharan dust deposition snowpack stability French Alps	claude
+c11	paraphrase	How do forecasters judge how likely a skier is to set off a slide?	claude
+c12	paraphrase	Why do some buried layers in the snow stay dangerous for weeks after a storm?	claude
+c13	paraphrase	How does a crack spread through snow before a whole slope lets go?	claude
+c14	paraphrase	Do big snowstorms or warm spells cause more avalanches at lower elevations?	claude
+c15	paraphrase	What kinds of weather patterns come before big avalanche cycles?	claude
+c16	paraphrase	How well do published avalanche forecasts match what people actually see in the field?	claude
+c17	paraphrase	What happens to avalanche activity as the climate warms?	claude
+c18	paraphrase	How do ski guides decide which slopes are safe to take clients on?	claude
+c19	paraphrase	Do people understand the colored warning levels the way forecasters mean them?	claude
+c20	paraphrase	Can a computer predict avalanche danger without a human forecaster?	claude
+c21	mixed	fatal backcountry avalanche accidents off-piste statistics Austria	claude
+c22	mixed	persistent slab versus storm slab forecaster hazard assessments	claude
+c23	mixed	wet snow avalanches and weather variables in low mountain ranges	claude
+c24	mixed	using snow depth observations to check snowpack simulations	claude
+c25	mixed	how hard practitioners tap during snow stability tests	claude
+c26	mixed	neural network predicting avalanche danger level from weather data	claude
+c27	mixed	effect of snowmobiles on snowpack strength	claude
+c28	mixed	atmosphere-ocean oscillations like El Nino and avalanche problems	claude
+c29	mixed	helicopter skiing terrain choices and avalanche hazard	claude
+c30	mixed	deep persistent slab avalanches and large-scale circulation patterns	claude
+h01	identifier	Colorado avalanche records	hand
+h02	identifier	How to use the extended column test to evaluate the snowpack and risks	hand
+h03	identifier	Avalanche danger scale	hand
+h04	paraphrase	It is common for backcountry skiers to experience different trends than the forecast said? How often?	hand
+h05	paraphrase	What is the impact of a recent snowstorm or heatwave on the avalanche forecast?	hand
+h06	paraphrase	Backcountry ski terrain with lower avalanche risk	hand
+h07	mixed	Colorado specific snowpack characteristics and dangers.	hand
+h08	mixed	Does Colorado commonly deal with a persistent slab?	hand
+h09	paraphrase	How do avalanche risks differ in Europe compared to the United States?	hand
+h10	paraphrase	How do ski resorts mitigate avalanche risk?	hand
