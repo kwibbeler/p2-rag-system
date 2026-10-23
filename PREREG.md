@@ -24,7 +24,7 @@ One sentence, about your own corpus, naming two of your systems and a direction.
 For example: "On my corpus of Kubernetes documentation, `rerank` has a higher MRR@10 than `hybrid`, because the queries are paraphrases that a first-stage fusion ranks too low."
 It should be something you could be wrong about.
 
-TODO: your hypothesis.
+On my corpus of open-access scientific papers about snow and avalanches, specifically avalanche forecasting, snowpack stability, and avalanche hazard, I predict that `hybrid` will have a higher MRR@10 than `rerank` because the `hybrid` will look at more than just the first 600 characters that `rerank` is looking at so important content later in a paper will still get included because my documents are 4-page parts of papers. 
 
 ---
 
@@ -36,7 +36,7 @@ A difference of 0.02 is usually not worth a reranker's cost in time and tokens.
 In this course, choose a Δ of at least 0.15 unless you argue for a larger one, because a smaller gap takes more queries than one project can judge.
 Call your number Δ (delta).
 
-TODO: your metric and your Δ, with the reason.
+The metric I will be using is MRR@10 and a Δ (delta) of 0.2. I chose this Δ and not smaller because of the cost of `rerank` being about 15,000 tokens and 7-10 seconds per query and `hybrid` costs almost nothing. A Δ of 0.2 in MRR@10 is about one position near the top such as rank 3 to rank 2 (+0.167).
 
 ---
 
@@ -65,7 +65,11 @@ After you score the own corpus, the minimum detectable difference that `uv run p
 It should come out at or below your Δ.
 If it does not, your queries varied more than your stage 1 sd suggested, and you will say so in the outcome.
 
-TODO: your sd, which pair it came from, your n, and the number of queries you will write (at least n).
+The standard deviation on MRR@10 is 0.394 from results/results.json which came from the pair rerank vs. hybrid on the 20 shared practice queries. Using the formula below n = 30.4. I will write 40 queries to account for the fact that the sd was only calculated from 20 queries on a different corpus.
+
+n = ((1.96 + 0.84) * sd / Δ)^2
+n = (2.8 * 0.394 / 0.20)^2 ≈ 30.4 → about 31 queries
+
 
 ---
 
@@ -82,7 +86,9 @@ This is the default rule, and you can tighten it, but do not loosen it after you
 | around zero, with both ends inside plus or minus Δ | well-powered null: a difference as large as Δ is ruled out |
 | around zero, with an end beyond plus or minus Δ | inconclusive: the gold set could not settle it, and I say so |
 
-TODO: confirm or tighten this rule, and name the two systems and the metric once more.
+I will tighten this rule, specifically requiring the power check so that the minimum detectable difference for the hybrid and rerank pair on MRR@10 in the own-pairs table must be at or below the delta of 0.2. Even if an entire interval is below zero, if the power check is not met, then the result will be labeled as inconclusive.
+
+For something to be supported in the interval it would mean that the interval is entirely below zero because I hypothesized that hybrid performs better and the calculation is rerank minus hybrid. 
 
 ---
 
