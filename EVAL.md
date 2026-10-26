@@ -101,7 +101,15 @@ Which differences are distinguishable from zero and which are not?
 What is the minimum detectable difference at 20 queries, and what does that say about any gap smaller than it?
 Which claim from lecture 12 or 13 did your numbers support, and which did they leave open?
 
-TODO: write what the practice-query intervals let you claim.
+The differences distinguishable from zero for each metric are:
+- MRR@10: rerank over all three with these results: bm25 +0.293 [+0.043, +0.533], dense +0.237 [+0.083, +0.408], hybrid +0.329 [+0.164, +0.504].
+- Recall@10 and nDCG@10: rerank over dense and over hybrid are distinguishable on both, but rerank over bm25 is not (recall +0.108 [−0.133, +0.350]; nDCG +0.227 [−0.009, +0.452]).
+
+The minimum detectable difference at 20 queries for MRR@10 is 0.192 (hybrid − bm25) and 0.412 (dense − bm25). A gap below roughly 0.2 to 0.4 would not show up on these 20 queries. 
+
+My numbers supported the claim from lecture 13 that an LLM reranker improves a candidate list because rerank beat hybrid on every metric. Lecture 12's idea that BM25 is the baseline to beat had these results: dense over bm25 is +0.055 [−0.225, +0.343], so that claim is undecided.
+
+
 
 ---
 
@@ -120,7 +128,19 @@ Then read three in-corpus answers that `uv run p2 verify` passed.
 For each one, open the cited chunk and say whether the quote really supports the claim next to it.
 The check proves a quote is a real piece of the chunk and cannot prove that it supports the claim, so this reading is the part only you can do.
 
-TODO: write your answer choices and your three-answer audit.
+
+
+
+| Answer | Claim(s) I checked | Cited chunk | Does the quote support the claim? | What I noticed |
+| --- | --- | --- | --- | --- |
+| a01 | "The operator shall immediately contact MSHA within 15 minutes at the toll-free number once it knows an accident involving a death has occurred." | cfr30-50.10 | Yes | Answers correctly |
+| a02 | "Rock dust must be distributed and maintained so that the incombustible content of the combined coal dust, rock dust, and other dust is not less than 80 percent.", "The incombustible content requirement is only increased above the base level when methane is present in the ventilating current, by 0.4 percent for each 0.1 percent of methane." | cfr30-75.403 | No, the "only" part of the claim is not supported by the quotes. | Making a conclusion from the two quote was not done correctly. |
+| a07 | "Berms or guardrails shall be at least mid-axle height of the largest self-propelled mobile equipment which usually travels the roadway (surface metal/nonmetal mines)", "Berms or guardrails shall be provided and maintained on the banks of roadways where a drop-off exists of sufficient grade or depth to cause a vehicle to overturn or endanger persons in equipment", and "Berms may have openings to the extent necessary for roadway drainage"| cfr30-57.9300 | Yes | Each claim was only tied to one quote. |
+
+The audits above show that `p2 verify` does not check that a claim follows from its quote, and it doesn't look at the sentences outside the claims. 
+
+The hybrid answered because it was half the cost of the rerank and the tradeoff is that we lose the performance of the rerank which clearly performed better but it cost more. I did not change anything in the `prompts/answer.txt` and the verified and declined shares were 8 of 8 and 4 of 4. 
+
 
 ---
 
@@ -267,7 +287,11 @@ Which differences are distinguishable and which are not, at your gold-set size?
 Do the `hand` queries and the `claude` queries tell the same story?
 Did your prediction in `DECISIONS.md` prompt 1 hold?
 
-TODO: write what your own-corpus intervals let you claim.
+The differences that are distinguishable at my gold-set size for MRR@10 is only the rerank - dense pair, all of the others include zero in the interval. The ordering from the results is rerank 0.907 > hybrid 0.887 > dense 0.851 > bm25 0.823.
+
+The hand queries and the Claude queries tell a similar story with one notable pattern. The hand queries scored lower on every system which tells me that my queries were harder for these systems. My queries were borader and mroe vague which could be why they were more challenging.  
+
+My prediction that hybrid would perform best and rerank worst from prompt 1 did not hold. In fact, the results contradicted my prediction as rerank had the highest MRR@10 and hybrid was second. 
 
 ---
 
@@ -320,7 +344,8 @@ What did you change, what happened, and does the interval support the claim you 
 If the result is not distinguishable, say what size of effect your gold set could have seen.
 Read the queries at the top of each list in the second table, and say whether your change explains them.
 
-TODO: write the ablation: the one change, the hypothesis, the result and the claim.
+
+I changed the dense chunks from 300 words to 600 words while keeping the overlap at 50. My hypothesis was that the change would raise the MRR@10 because of the additional context from the larger chunks. The result of this change is that MRR@10 went from 0.851 to 0.865 with an interval of [-0.033, +0.067]. My hypothesis was that the MRR@10 would be raised but because the interval contains zero, we cannot claim that the impact was significant, rather that the results were not distinguishable from the null. The minimum detectable difference for this pair is 0.072, which tells us that a large effect is unlikely. Looking at query 14 "Do big snowstorms or warm spells cause more avalanches at lower elevations?" which may be because this query benefitted from the additional context because the prompt is asking about an inference or derived relationship. For the queries that were hurt by the change, they only dropped 1 rank and the other 34 queries had the same rankings so this supports the evidence that the change was not significant. One other thing to note is that even though the chunk size was 600 words, because of the bge-small truncation we actually only ended up reading the first 380 words so this also could explain the results not differing significantly compared to the null. 
 
 ---
 
@@ -332,8 +357,14 @@ Then sort the failures by cause, for example a vocabulary mismatch, near-duplica
 
 | qid | what the best system returned | what was relevant | cause | what you would try |
 |---|---|---|---|---|
+| h04 | The forecast consistency paper first, then 4 of the top five from one paper about the user-perspective study of the danger scale.|Only 3 of the documents were relevant, the consistency paper's part (p017-020) was in hybrid's top 20, and rerank put it at rank 9, the others were not in the 20 the reranker saw. | The failure happened in the first stage so either the bm25 or dense did not rank the relevant documents in the top 20. I would guess that this is because of the word "common" used in the query is general and not specifically defined. | I would try to rewrite the query using specific terms that can be measured so that results are more concrete as well as adding more candidates to the first stage. For example I would remove the word "common" and ask for a certain number of examples to fix this. |
+| h09 | The Austria-vs-US accident paper first (judged relevant), then danger-scale, forecast-consistency, atmosphere-ocean and western-Canada hazard papers were returned.| 8 documents were relevant as two were in the top 10 (ranks 1 and 9), three were in hybrid's top 20 but didn't reach rerank's top 10 (including two parts of the avalanche-size paper at hybrid ranks 2 and 6). Three never reached the reranker.| The reranker moved a relevant document down, this is likely due to the first 600 words of the documents were mainly headers and captions and not other content. | I would try to show Claude more than 600 characters or give it more than 20 candidates so that relevant documents stay at the top. |
+| c11 |The forecast-model papers, the tapping-force paper, and a forecaster-assessment paper were returned.| 6 documents were relevant, four were in hybrid's top 20 (ranks 1, 2, 14 and 15 across them) but only one reached rerank's top 10, and two never reached the reranker.| The reranker moved a relevant document down, this is likely due to the first 600 words of the documents were mainly headers and captions and not other content. | I would try to show Claude more than 600 characters or give it more than 20 candidates so that relevant documents stay at the top. |
+| h07 | The top four are all parts of the snowmobile paper (tc-12-1121-2018), whose study plots are in Colorado (Rabbit Ears Pass and Fraser Experimental Forest, per the snippet) were returned. | 5 documents were relevant, with two in the top 10 (ranks 4 and 6). The other three (one part of the Colorado paper and two of the Saharan-dust paper) never reached the reranker.| The failure happened in the first stage so either the bm25 or dense did not rank the relevant documents in the top 20. I would guess that this is because of the words "Colorado specific" used in the query was hard to find a concrete match for because it was asking for a conclusion to be made.|I would try to rewrite the query using specific terms that can be measured so that results are more concrete as well as adding more candidates to the first stage. I would give terms like "persistent slab" or other snow characteristics to look for specifically.  |
+| h05 | Weather-variables, machine-learning prediction, Colorado avalanche-frequency, Canadian hazard and Swiss climate-change papers were returned. | 5 documents were marked as relevant and 3 of them never reached the reranker. | The failure happened in the first stage so either the bm25 or dense did not rank the relevant documents in the top 20. I would guess that this is because of the word "impact" used in the query and it is unclear what kind of impact the user is looking for to be drawn from the documemt.| I would try to rewrite the query using specific terms that can be measured so that results are more concrete as well as adding more candidates to the first stage.I would remove the word "impact" and quantify another way. |
 
-TODO: add one row for each failure you analyzed, and write two or three sentences on the pattern you see across them.
+
+Looking at the results I see two main patterns, there were failures because of the way the queries were written (lacking concrete terminology that leaves no room for interpretation), or because relevant documents were moved down due to not enough candidates to make a meaningful decision.
 
 ---
 
@@ -346,7 +377,55 @@ Did the winner change between the shared corpus and yours?
 Why, or why not: what is different about the two collections (document length, vocabulary, identifiers, near-duplicates, how the queries were written), and which of your explanations did you test and which are guesses?
 Say what 20 queries on one side and your gold-set size on the other cannot support.
 
-TODO: write the cross-corpus comparison.
+### Did the winner change?
+
+Rerank won on both corpora, but its lead shrank. On the shared corpus it beat all three others clearly (MRR@10 0.800 against 0.47 to 0.56). On my own it was still first (0.907), but only rerank over dense is distinguishable.
+
+Hybrid went from last to second. On the shared paraphrase queries, fusing with a bm25 that returned nothing dragged hybrid down to 0.152, well below dense alone (0.714). On my corpus, both parts work (bm25 0.604, dense 0.761), so fusing them gives 0.778.
+
+Overall scores copied from the tables in sections 1 and 4 (MRR@10):
+
+| | Shared corpus (20 queries) | My corpus (40 queries) |
+| --- | ---: | ---: |
+| bm25 | 0.507 | 0.823 |
+| dense | 0.562 | 0.851 |
+| hybrid | 0.471 | 0.887 |
+| rerank | 0.800 | 0.907 |
+| rerank minus hybrid, 95% interval | +0.329 [+0.164, +0.504] | +0.019 [-0.056, +0.093] |
+
+### Why: what is different, and what I tested
+
+Tested: Keyword search behaves very differently, and the overlap test explains why. I measured how many of each query's content words appear in its best relevant document:
+
+| Query class | Shared corpus | My corpus |
+| --- | ---: | ---: |
+| identifier | 0.92 | 0.96 |
+| paraphrase | 0.09 | 0.71 |
+| mixed | 0.52 | 0.89 |
+
+The shared set's paraphrase queries share only 9% of their words with their answers, while in my corpus the share is 71%. That matches the bm25 results: MRR@10 of 0.000 on the shared paraphrase queries and 0.604 on mine.
+
+Shared example (p09): "Should crews stop setting off charges when a thunderstorm rolls in?" bm25 found nothing (reciprocal rank 0.00), while dense and rerank both put the answer first (1.00). The query and the rule share almost no words.
+
+Example from my corpus (c13): "How does a crack spread through snow before a whole slope lets go?" shares crack, slope, snow, spread, through with its best relevant document, so bm25 finds it at rank 1, the same as dense and rerank.
+
+Guess: I think that this is because both sets of documents are both technical and of similar format.
+
+I would say the main difference between the two is not actually the document contents or the type but how the queries were written. For my own corpus I wrote them and prompted Claude based on what information I would like to know as a backcountry skier. It could very well be the case that my queries just were not written in a way that could be answered effectively. 
+
+### What 20 queries and my gold-set size cannot support
+
+Minimum detectable difference and query counts for each corpus (values from `results/results.json`):
+
+| | Shared corpus (20 queries) | My corpus (40 queries) |
+| --- | ---: | ---: |
+| Smallest detectable gap across the six system pairs (MRR@10) | 0.19 to 0.41 | 0.08 to 0.16 |
+| `rerank − hybrid` | 0.247 | 0.109 |
+| `dense − bm25` | 0.412 | 0.144 |
+| Interval width, `dense − bm25` | 0.568 | 0.201 |
+| Queries per class (identifier / paraphrase / mixed) | 7 / 7 / 6 | 13 / 15 / 12 |
+
+These results show us that the range for smallest detectable gap across the 6 system pairs was much wider for the shared corpus than my own. The result of the smallest detectable gap being smaller for my own corpus is most likely due to having a larger set of queries (40 instead of 20). This means that gaps smaller than the minimum detectable difference are invisible to that query set. On the shared set that is anything under roughly 0.2 to 0.4, and on mine anything under roughly 0.1 to 0.15.
 
 ---
 
@@ -438,6 +517,50 @@ _No stretch runs yet (stretch option 5): `uv run p2 run --corpus own --queries e
 
 Write the five things here.
 
+1. **The option's name:** rider
+2. **What I did, and the files that hold it:** For the rider I asked Claude for the same thing three times to see how much the results vary, and the pre-registered claim. I re-ran the reranker three times on the 20 shared practice queries and re-ran the 12 cited answers three times with hybrid, and I pre-registered a claim about my own corpus before judging. The files are:
+    - the reranker repeats: runs/shared/rerank.practice.r1.trec, .r2.trec, .r3.trec
+    - their traces: traces/shared-practice-rerank.r1.jsonl, .r2.jsonl, .r3.jsonl
+    - the answer repeats: answers/shared/hybrid.r1.json, .r2.json, .r3.json
+    - their traces: traces/answers-hybrid.r1.jsonl, .r2.jsonl, .r3.jsonl
+    - PREREG.md
+   
+3. **The table `p2 score` wrote for it:**
+   Repeated runs of rerank on shared/practice:
+
+   | Run | Recall@10 | MRR@10 | nDCG@10 |
+   | --- | ---: | ---: | ---: |
+   | rerank.r1 | 0.733 | 0.800 | 0.739 |
+   | rerank.r2 | 0.758 | 0.800 | 0.751 |
+   | rerank.r3 | 0.721 | 0.775 | 0.715 |
+   | range (max minus min) | 0.037 | 0.025 | 0.036 |
+
+   | Comparison | Metric | Mean difference | 95% interval | Reading |
+   | --- | --- | ---: | ---: | --- |
+   | rerank.r1 minus hybrid | Recall@10 | +0.142 | [+0.050, +0.258] | rerank.r1 higher |
+   | rerank.r2 minus hybrid | Recall@10 | +0.167 | [+0.058, +0.292] | rerank.r2 higher |
+   | rerank.r3 minus hybrid | Recall@10 | +0.129 | [+0.025, +0.250] | rerank.r3 higher |
+   | rerank.r1 minus hybrid | MRR@10 | +0.329 | [+0.164, +0.504] | rerank.r1 higher |
+   | rerank.r2 minus hybrid | MRR@10 | +0.329 | [+0.164, +0.504] | rerank.r2 higher |
+   | rerank.r3 minus hybrid | MRR@10 | +0.304 | [+0.140, +0.482] | rerank.r3 higher |
+   | rerank.r1 minus hybrid | nDCG@10 | +0.296 | [+0.168, +0.427] | rerank.r1 higher |
+   | rerank.r2 minus hybrid | nDCG@10 | +0.308 | [+0.180, +0.438] | rerank.r2 higher |
+   | rerank.r3 minus hybrid | nDCG@10 | +0.271 | [+0.135, +0.414] | rerank.r3 higher |
+
+   Repeated answers shared/hybrid:
+
+   | File | Verified (in) | 95% interval | Declined (out) | 95% interval |
+   | --- | ---: | ---: | ---: | ---: |
+   | hybrid.r1 | 8 of 8 (100%) | [0.676, 1.000] | 4 of 4 (100%) | [0.510, 1.000] |
+   | hybrid.r2 | 8 of 8 (100%) | [0.676, 1.000] | 4 of 4 (100%) | [0.510, 1.000] |
+   | hybrid.r3 | 8 of 8 (100%) | [0.676, 1.000] | 4 of 4 (100%) | [0.510, 1.000] |
+   | range (max minus min) | 0.000 |  | 0.000 |  |
+
+   Each repeat answers the same questions, so the repeats are not independent trials and their counts are not pooled into one interval.
+4. **What its interval lets me claim, and what it does not:** The reranker's gain over hybrid survived the repeats, and the pre-registered comparison was a null. What it does not let us claim is that the answer shares rest on only 8 and 4 questions so they aren't independent trials because the repeats cover the same questions.
+5. **One thing I would do next, and what result would tell me it worked:** Next I would get candidate documents that aren't pooled from bm25, dense and hybrid, because the pooling could have understated rerank. To see if this really worked I would see rerank and hybrid even further apart. 
+
+
 ---
 
 ## 9. 598E only - repeats and the pre-registered claim
@@ -486,7 +609,7 @@ Each repeat answers the same questions, so the repeats are not independent trial
 Does the reranker's gain over its first stage survive the run-to-run variation?
 Write what the spread is, how it compares with the gain, and what the Wilson intervals on the verified share and the declined share say about 8 and 4 questions.
 
-598E: write the repeats result here.
+The reranker's gain over its first stage did survive the run-to-run variation because the results for the reranker MRR@10 across the three were 0.8, 0.8 and 0.775. The spread of the gain is 0.025. For the gain over hybrid the results were +0.329, +0.329 and +0.304, with every interval above zero (the lowest lower bound is +0.140). All three repeats were identical with 8 of 8 verified (Wilson 95% [0.676, 1.000]) and 4 of 4 declined ([0.510, 1.000]), range 0.000. The intervals are wide because 8 and 4 questions can't show much. A perfect score on 4 still leaves a lower bound of 0.51. 
 
 ### The pre-registered claim
 
@@ -494,4 +617,11 @@ The claim, the smallest effect, the gold-set size and the test are in `PREREG.md
 Here, say whether you followed the plan, what the interval turned out to be, and what that means.
 The outcome section of `PREREG.md` holds the short version.
 
-598E: write the claim and its outcome here.
+I did end up following my plan and you can see that in the git history. The interval for my preregisterd claim on my corpus is rerank minus hybrid on MRR@10 and the results were: 
+    Mean difference: +0.019
+    95% interval: [−0.056, +0.093]
+    Reading from p2 score: not distinguishable
+    Minimum detectable difference: 0.109 (my tightened rule needed it at or below Δ = 0.2, so it is met)
+    Gold set: 40 queries with a per-query spread of 0.247
+
+Looking at these results we can see that my hypothesis was not supported.

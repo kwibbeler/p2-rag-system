@@ -99,7 +99,14 @@ Which row of the table in section 4 is it?
 Did your gold set reach the size section 3 asked for, and what was the minimum detectable difference that `uv run p2 score` printed?
 What would you do next, and what would you want a reader to take from this?
 
-TODO: your outcome.
+
+The interval for rerank minus hybrid on MRR@10 had a mean difference of +0.019 and a 95% interval [−0.056, +0.093].
+
+My hypothesis was that hybrid would be higher, which in my table's sign convention means the interval entirely below zero. The interval includes zero with both ends inside ±0.2, which is the row I labeled a well-powered null meaning a difference as large as Δ is ruled out. With this interval, my hypothesis was not supported. The tightening needed the minimum detectable difference at or below Δ, and it was 0.109, so that is met and the label stands. 
+
+Did your gold set reach the size section 3 asked for? Yes, my gold set reached the size section 3 asked for. Section 3 calculated 31 queries from an sd of 0.394, and I had 40 queries. The per-query spread on my corpus came out at 0.247, lower than the 0.394 I had planned with, so I had more power than I sized for. The minimum detectable difference was 0.109.
+
+Next I would like to work on getting candidate documents that are not pooled from bm25, dense and hybrid because I think that could have introduced some bias and impacted the results. I think the reader should take away how significantly the rerank outperformed on the shared corpus by a lot but the results were a lot closer on my own corpus. 
 
 ---
 
