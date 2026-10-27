@@ -40,7 +40,7 @@ If you rejected the alternative without measuring it, say why that was a fair ca
 "There was no alternative" is not an answer.
 Find the fork.
 
-TODO: your answer to prompt 2.
+When I was working on section 5 of the EVAL.md, I was debating if I should measure the effect of doubling the chunk size or cutting it in half. I ended up picking a chunk size of 600 words because I wanted to see if there was any impact on the query results if there was more context per chunk. The main reason I did not choose 150 words is because that would mean double the chunks to embed and score than 300 words and I was not confident that would perform well with the lack of detail so I went with the 600 word size. What I gave up because I only tested the larger side, is that I can't say whether smaller chunks would have beaten 300 words.I never actually ran a comparison with 150 words so I don't know what the results were. The results I do have for this choice show that 600 words vs. 300 words has no detectable difference with a mean of +0.014 and the interval for MRR@10 being [−0.033, +0.067]. 
 
 ---
 
@@ -56,7 +56,7 @@ What did you do instead?
 If it genuinely never happened, say so plainly, and then say what you would have had to check in order to notice.
 Being honest here costs you far less than a story you cannot defend when you record your video.
 
-TODO: your answer to prompt 3.
+There was not a case where I overruled the agent. I think this was mainly due to the fact that I was only focusing on one step at a time and not all of the steps for the whole project, so I wasn't challenging something the agent said that might have an impact down the road because I was not looking that far either. In order to notice I would have had to compare the paper count the agent gave me with the rows in corpora/own/manifest.tsv, and read the license column against the publisher pages. The agent assumed every paper from 2018 on was CC BY 4.0, and it found the two CC BY 3.0 papers later; I would only have noticed by reading the license column myself.
 
 ---
 
@@ -68,7 +68,7 @@ It could be a mean over a small query class, a difference whose interval include
 What would have to be true for you to trust it?
 Did you do anything to test it, and what did that show?
 
-TODO: your answer to prompt 4.
+A number I do not fully trust is from rerank minus hybrid with MRR@10 = +0.019 and the interval [−0.056, +0.093]. Since the interval includes zero it does not fully tell me that rerank was better than hybrid. Zero inside the interval means the data are compatible with no difference, but the real problem is power. The MDD for this pair is 0.109, and the difference I saw was 0.019, about a fifth of that. With 40 queries, this gold set could only have detected a gap more than five times bigger than the one I measured. For scale, using my PREREG standard deviation of 0.247, detecting 0.019 would take about 1,300 queries. So in order to trust this result I would like to have about 1,300 queries and then evaluate the results that way. 
 
 ---
 
@@ -79,4 +79,4 @@ One thing in your system, your corpus or your gold set that is not right, not fi
 What would you do next, and how would you find out whether it matters?
 Name the file, the query or the document where someone could look.
 
-TODO: your answer to prompt 5.
+One thing that is not right, or that I want to investigate more is that the queries that I wrote by hand performed worse than the queries written by claude. I would like to investigate if this is because I wrote harder queries, or if there are patterns in each of the groups that would tell us where the systems struggled or did well. 
